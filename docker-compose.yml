@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  apartment-bot:
+    build: .
+    container_name: apartment-bot
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    volumes:
+      - ./logs:/app/logs
+      - ./bot.log:/app/bot.log
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

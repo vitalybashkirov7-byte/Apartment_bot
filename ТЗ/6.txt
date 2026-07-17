@@ -1,0 +1,173 @@
+# РЕКОМЕНДАЦИИ ПО ИСПРАВЛЕНИЮ ПАРСИНГА КВАРТИР
+
+## ТЕКУЩИЕ ПРОБЛЕМЫ
+| Источник | Ошибка | Причина |
+|----------|--------|---------|
+| ЦИАН | 0 объявлений | Устаревшие CSS-селекторы |
+| Авито | HTTP 429 | Блокировка по частоте запросов |
+| N1.RU | 0 объявлений | Устаревшие CSS-селекторы |
+| Домклик | HTTP 401 | Требуется авторизация |
+
+---
+
+## РЕШЕНИЯ ПО ИСТОЧНИКАМ
+
+### 1. ЦИАН (обновить селекторы)
+**Действие:** Зайти на cian.ru → найти объявления → скопировать актуальные CSS-классы
+
+**Пример обновления в коде:**
+```python
+# Было (устарело)
+price_selector = ".price span"
+address_selector = ".address"
+
+# Стало (актуально)
+price_selector = '[data-testid="price"]'
+address_selector = '[data-testid="address"]'
+Запасной вариант: Использовать API через Apify (готовый парсер)
+
+2. Авито (обход блокировки)
+Действие 1: Установить библиотеку curl_cffi
+
+bash
+pip install curl_cffi
+Действие 2: Внедрить прокси и задержки
+
+python
+from curl_cffi import requests
+import time
+import random
+
+# Ротация прокси
+PROXY_LIST = [
+    "http://user:pass@ip1:port",
+    "http://user:pass@ip2:port",
+]
+
+def fetch_avito():
+    proxy = random.choice(PROXY_LIST)
+    response = requests.get(
+        url,
+        impersonate="chrome120",  # эмуляция браузера
+        proxies={"http": proxy, "https": proxy},
+        timeout=30
+    )
+    time.sleep(random.uniform(3, 7))  # задержка
+    return response
+Действие 3: Добавить повторные попытки при 429
+
+python
+from time import sleep
+
+def fetch_with_retry(url, max_retries=5):
+    for attempt in range(max_retries):
+        response = requests.get(url, impersonate="chrome120")
+        if response.status_code == 429:
+            wait = (2 ** attempt) * 5  # 5, 10, 20, 40, 80 сек
+            sleep(wait)
+            continue
+        return response
+3. N1.RU (обновить селекторы)
+Действие: Аналогично ЦИАН — обновить селекторы через инспектор
+
+Проверить: Есть ли скрытое API (вкладка Network → XHR)
+
+4. Домклик (обход авторизации)
+Вариант А (простой): Использовать публичную карту без авторизации
+
+https://домклик.рф/map/?region=Новосибирск
+Вариант Б (сложный): Selenium с авторизацией
+
+python
+from selenium import webdriver
+
+def parse_domclick():
+    driver = webdriver.Chrome()
+    driver.get("https://домклик.рф/login")
+    # авторизация
+    driver.find_element("id", "login").send_keys("login")
+    driver.find_element("id", "password").send_keys("password")
+    driver.find_element("css", "button").click()
+    # парсинг после авторизации
+    driver.get("https://домклик.рф/novosibirsk/kupit-kvartiru/")
+    # ... сбор данных
+Вариант В (крайний): Временно отключить Домклик
+
+python
+SOURCES = ["cian", "avito", "n1"]  # без domclick
+ОБЩИЕ УЛУЧШЕНИЯ (ДЛЯ ВСЕХ ИСТОЧНИКОВ)
+1. Ротация User-Agent
+python
+from fake_useragent import UserAgent
+ua = UserAgent()
+headers = {"User-Agent": ua.random}
+2. Увеличение таймаута
+python
+requests.get(url, timeout=30)  # вместо 10
+3. Сохранение HTML для отладки
+python
+with open(f"debug_{source}.html", "w", encoding="utf-8") as f:
+    f.write(response.text)
+4. Кеширование результатов
+python
+CACHE_HOURS = 1
+if cached_data and (now - cache_time).seconds < CACHE_HOURS * 3600:
+    return cached_data  # не ходить на сайт
+5. Переключение на Selenium/Playwright при блокировке
+python
+try:
+    response = requests.get(url)
+except:
+    # автоматическое переключение
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(url)
+        html = page.content()
+ПОРЯДОК ИСПРАВЛЕНИЙ (ПО ПРИОРИТЕТУ)
+Сначала ЦИАН — самый надёжный источник
+
+Затем N1.RU — схож с ЦИАН по сложности
+
+Потом Авито — самый сложный, требует прокси
+
+Домклик — если не получится, временно отключить
+
+ЧЕК-ЛИСТ ПРОВЕРКИ
+Обновлены селекторы для ЦИАН
+
+Обновлены селекторы для N1.RU
+
+Установлена библиотека curl_cffi
+
+Настроен список прокси (минимум 3-5 штук)
+
+Добавлены задержки между запросами
+
+Добавлены повторные попытки при 429
+
+Настроена ротация User-Agent
+
+Добавлен таймаут 30 секунд
+
+Реализовано кеширование на 1 час
+
+Добавлено логирование ошибок
+
+Проверена работа каждого источника отдельно
+
+Проверен итоговый вывод в боте
+
+ПРИМЕР ИТОГОВОГО ВЫВОДА
+🏠 ЖК "Европейский"
+📍 ул. Кирова, 15
+📐 Площадь: 110 м²
+🛏 Комнат: 3
+🚽 Санузлов: 2
+💰 Цена: 12 900 000 ₽
+📝 Описание: Просторная квартира с панорамным видом. Ремонт 2025 года.
+🔗 Ссылка: https://novosibirsk.cian.ru/sale/flat/12345/
+📅 Источник: ЦИАН
+
+

@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Cookies and secrets
+*_cookies.pkl
+secrets.encrypted
+bot_stats.json
+user_settings.json
+
+# Debug files
+*_debug*.html
+*_debug*.py
+test_*.py
+avito_refresh_cookies.py
+domclick_*.py
+install_chromedriver.py
+find_nsk.py
+
+# UC/Chrome profiles
+domclick_chrome_profile/
+uc_*/
+node_modules/
+package*.json
+
+# ChromeDriver
+chromedriver*
