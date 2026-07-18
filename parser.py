@@ -520,6 +520,7 @@ async def parse_cian_playwright() -> list[Apartment]:
             browser = await p.chromium.launch(
                 headless=True,
                 proxy={"server": PROXY} if PROXY else None,
+                args=["--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"],
             )
 
             context = await browser.new_context(
@@ -678,6 +679,7 @@ async def parse_n1_playwright() -> list[Apartment]:
             browser = await p.chromium.launch(
                 headless=True,
                 proxy={"server": PROXY} if PROXY else None,
+                args=["--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"],
             )
 
             context = await browser.new_context(
