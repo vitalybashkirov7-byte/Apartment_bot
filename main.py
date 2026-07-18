@@ -1,9 +1,9 @@
 """
 Точка входа для Telegram-бота поиска квартир в Новосибирске
 """
+import os
 import logging
 import sys
-import os
 from logging.handlers import RotatingFileHandler
 
 from config import TELEGRAM_BOT_TOKEN, LOG_FILE, LOG_LEVEL, MAX_LOG_SIZE_MB, HTTP_PROXY
@@ -36,6 +36,7 @@ def setup_logging():
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("telegram").setLevel(logging.WARNING)
+    logging.getLogger("telegram.ext").setLevel(logging.WARNING)
 
 
 def main():
@@ -58,6 +59,9 @@ def main():
         # Прокси для Telegram API (только из config, НЕ из env)
         PROXY = HTTP_PROXY
 
+        # Увеличиваем дефолтный timeout httpx (5с → 60с)
+        os.environ["HTTPX_DEFAULT_TIMEOUT"] = "60"
+
         # Создаём бота с учётом прокси
         application = create_bot(proxy=PROXY)
         
@@ -65,7 +69,11 @@ def main():
         print("✅ Бот запущен! Нажмите Ctrl+C для остановки.")
         if PROXY:
             print(f"🔒 Используется прокси: {PROXY}")
-        application.run_polling(allowed_updates=["message", "callback_query"])
+        application.run_polling(
+            allowed_updates=["message", "callback_query"],
+            drop_pending_updates=True,
+            timeout=1,
+        )
     except KeyboardInterrupt:
         logger.info("Бот остановлен пользователем")
         print("\n⏹ Бот остановлен.")

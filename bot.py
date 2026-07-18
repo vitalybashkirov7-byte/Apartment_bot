@@ -702,9 +702,10 @@ def create_bot(proxy: str = None):
     if proxy:
         http_request = HTTPXRequest(
             proxy=proxy,
-            connect_timeout=30,
-            read_timeout=30,
-            write_timeout=30,
+            connect_timeout=60,
+            read_timeout=60,
+            write_timeout=60,
+            pool_timeout=60,
             media_write_timeout=60,
         )
         application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).request(http_request).build()
