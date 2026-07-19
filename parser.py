@@ -673,7 +673,7 @@ async def parse_n1_playwright() -> list[Apartment]:
     """Парсинг объявлений с N1.RU через Playwright Async API (fallback при блокировке HTTP)"""
     apartments = []
     try:
-        PROXY = os.getenv("HTTP_PROXY") or HTTP_PROXY
+        PROXY = os.getenv("HTTP_PROXY")
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(
@@ -1382,47 +1382,32 @@ async def search_apartments(use_cache: bool = True, max_age_days: int = 0) -> tu
 
     errors: list[str] = []
 
-    # === Блок 1: CIAN + N1.RU параллельно (Playwright, не конфликтуют) ===
-    async with aiohttp.ClientSession(headers=headers) as session:
-        cian_result = await parse_cian(session)
-        cian_is_empty = isinstance(cian_result, list) and len(cian_result) == 0
-
-        n1_result = await parse_n1(session)
-        n1_is_empty = isinstance(n1_result, list) and len(n1_result) == 0
-
+    # === CIAN + N1.RU: всегда через Playwright ===
     all_apartments = []
 
-    # CIAN: HTTP → Playwright fallback
-    if isinstance(cian_result, list):
-        if cian_is_empty:
-            logger.info("Циан HTTP: 0 объявлений, пробуем Playwright fallback...")
-            pw_result = await parse_cian_playwright()
-            if isinstance(pw_result, list) and pw_result:
-                all_apartments.extend(pw_result)
-                errors.append(f"ℹ️ Циан: HTTP блокирован, получено {len(pw_result)} через Playwright")
-            else:
-                errors.append("⚠️ Циан: 0 объявлений (HTTP + Playwright)")
+    # CIAN: всегда через Playwright (HTTP заблокирован стабильно)
+    try:
+        pw_result = await parse_cian_playwright()
+        if isinstance(pw_result, list) and pw_result:
+            all_apartments.extend(pw_result)
+            logger.info(f"Циан: получено {len(pw_result)} через Playwright")
         else:
-            all_apartments.extend(cian_result)
-    elif isinstance(cian_result, Exception):
-        errors.append(f"❌ Циан: {str(cian_result)[:80]}")
-        logger.error(f"Ошибка при парсинге Циан: {cian_result}")
+            errors.append("⚠️ Циан: 0 объявлений")
+    except Exception as e:
+        errors.append(f"❌ Циан: {str(e)[:80]}")
+        logger.error(f"Ошибка при парсинге Циан: {e}")
 
-    # N1.RU: HTTP → Playwright fallback
-    if isinstance(n1_result, list):
-        if n1_is_empty:
-            logger.info("N1.RU HTTP: 0 объявлений, пробуем Playwright fallback...")
-            pw_result = await parse_n1_playwright()
-            if isinstance(pw_result, list) and pw_result:
-                all_apartments.extend(pw_result)
-                errors.append(f"ℹ️ N1.RU: HTTP блокирован, получено {len(pw_result)} через Playwright")
-            else:
-                errors.append("⚠️ N1.RU: 0 объявлений (HTTP + Playwright)")
+    # N1.RU: всегда через Playwright (HTTP заблокирован стабильно)
+    try:
+        pw_result = await parse_n1_playwright()
+        if isinstance(pw_result, list) and pw_result:
+            all_apartments.extend(pw_result)
+            logger.info(f"N1.RU: получено {len(pw_result)} через Playwright")
         else:
-            all_apartments.extend(n1_result)
-    elif isinstance(n1_result, Exception):
-        errors.append(f"❌ N1.RU: {str(n1_result)[:80]}")
-        logger.error(f"Ошибка при парсинге N1.RU: {n1_result}")
+            errors.append("⚠️ N1.RU: 0 объявлений")
+    except Exception as e:
+        errors.append(f"❌ N1.RU: {str(e)[:80]}")
+        logger.error(f"Ошибка при парсинге N1.RU: {e}")
 
     # === Блок 2: Авито (UC non-headless, последовательно) ===
     _kill_chrome()

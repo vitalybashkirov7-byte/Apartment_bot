@@ -695,22 +695,27 @@ class ApartmentBot:
 def create_bot(proxy: str = None):
     """Создание и настройка бота"""
     from telegram.ext import ApplicationBuilder
-    from telegram.request import HTTPXRequest
 
     bot = ApartmentBot()
 
+    builder = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN)
+
     if proxy:
-        http_request = HTTPXRequest(
-            proxy=proxy,
-            connect_timeout=60,
-            read_timeout=60,
-            write_timeout=60,
-            pool_timeout=60,
-            media_write_timeout=60,
+        builder = (
+            builder
+            .proxy(proxy)
+            .connect_timeout(60)
+            .read_timeout(60)
+            .write_timeout(60)
+            .pool_timeout(60)
+            .get_updates_proxy(proxy)
+            .get_updates_connect_timeout(60)
+            .get_updates_read_timeout(60)
+            .get_updates_write_timeout(60)
+            .get_updates_pool_timeout(60)
         )
-        application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).request(http_request).build()
-    else:
-        application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+
+    application = builder.build()
     
     application.add_handler(CommandHandler("start", bot.start))
     application.add_handler(CommandHandler("help", bot.help_command))
