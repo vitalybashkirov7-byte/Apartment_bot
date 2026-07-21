@@ -372,16 +372,22 @@ def is_decent_apartment(apt: Apartment, max_age_days: int = 0) -> bool:
             and apt.bathrooms >= SEARCH_CONFIG["min_bathrooms"]
         )
 
-    filters = {
+    # Обязательные фильтры
+    required = {
         "not_first_floor": apt.floor > 1,
         "not_last_floor": apt.floor < apt.total_floors,
-        "has_balcony": apt.has_balcony,
-        "good_condition": apt.condition in ["хорошее", "евроремонт"],
-        "not_old": apt.year is None or apt.year >= SEARCH_CONFIG["max_year"],
         "enough_rooms": apt.rooms >= SEARCH_CONFIG["min_rooms"],
         "enough_bathrooms": apt.bathrooms >= SEARCH_CONFIG["min_bathrooms"],
     }
-    return all(filters.values())
+
+    # Желательные (хотя бы 2 из 3)
+    preferred = sum([
+        apt.has_balcony,
+        apt.condition in ["хорошее", "евроремонт"],
+        apt.year is None or apt.year >= SEARCH_CONFIG["max_year"],
+    ])
+
+    return all(required.values()) and preferred >= 1
 
 
 async def parse_cian(session: aiohttp.ClientSession) -> list[Apartment]:
@@ -555,6 +561,8 @@ async def parse_cian_playwright() -> list[Apartment]:
                 logger.warning("Циан (Playwright): карточки не появились за 15с, пробуем парсить как есть")
 
             content = await page.content()
+            page_title = await page.title()
+            logger.info(f"Циан (Playwright): title={page_title[:80]}, content length={len(content)}")
 
             # Проверяем на блокировку
             if "доступ ограничен" in content.lower() or "подтвердите, что вы не робот" in content.lower():
@@ -702,6 +710,8 @@ async def parse_n1_playwright() -> list[Apartment]:
                 logger.warning("N1.RU (Playwright): карточки не появились за 15с")
 
             content = await page.content()
+            page_title = await page.title()
+            logger.info(f"N1.RU (Playwright): title={page_title[:80]}, content length={len(content)}")
 
             # Проверяем на блокировку
             if "доступ ограничен" in content.lower() or "подтвердите" in content.lower():
@@ -861,6 +871,7 @@ async def parse_domclick_playwright() -> list[Apartment]:
 
         tmp_dir = tempfile.mkdtemp(prefix="domclick_")
         apts = []
+        driver = None
 
         try:
             options = uc.ChromeOptions()
@@ -996,11 +1007,18 @@ async def parse_domclick_playwright() -> list[Apartment]:
                 except Exception:
                     continue
 
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
         except Exception as e:
             logger.warning(f"Домклик (UC): ошибка — {e}")
         finally:
+            try:
+                driver.quit()
+            except Exception:
+                pass
             # Восстанавливаем прокси
             if saved_http:
                 os.environ["HTTP_PROXY"] = saved_http
@@ -1051,6 +1069,7 @@ async def parse_avito_playwright() -> list[Apartment]:
         _kill_chrome()
         tmp_dir = tempfile.mkdtemp(prefix="avito_")
         apts = []
+        driver = None
 
         try:
             options = uc.ChromeOptions()
@@ -1067,7 +1086,12 @@ async def parse_avito_playwright() -> list[Apartment]:
             driver.get(url)
             time.sleep(15)
 
-            content = driver.page_source
+            try:
+                content = driver.page_source or ""
+            except Exception as e:
+                logger.warning(f"Авито (UC): не удалось получить page_source — {e}")
+                return []
+
             if "доступ ограничен" in content.lower() or "проверка безопасности" in content.lower():
                 logger.warning("Авито (UC): запросил капчу")
                 return []
@@ -1164,11 +1188,18 @@ async def parse_avito_playwright() -> list[Apartment]:
                 except Exception:
                     continue
 
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
         except Exception as e:
             logger.warning(f"Авито (UC): ошибка — {e}")
         finally:
+            try:
+                driver.quit()
+            except Exception:
+                pass
             if saved_http:
                 os.environ["HTTP_PROXY"] = saved_http
             if saved_https:

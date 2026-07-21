@@ -182,7 +182,7 @@ SEARCH_CONFIG = {
     "min_rooms": int(get_secret("MIN_ROOMS", "3")),  # мин. количество комнат
     "min_bathrooms": int(get_secret("MIN_BATHROOMS", "2")),  # мин. количество санузлов
     "min_floor": 2,  # не первый этаж
-    "max_year": 1990,  # год постройки не старше 1990
+    "max_year": 1985,  # год постройки не старше 1985
     "max_publication_age_days": int(get_secret("MAX_PUBLICATION_AGE_DAYS", "3")),  # макс. срок давности публикации (дни)
 }
 
