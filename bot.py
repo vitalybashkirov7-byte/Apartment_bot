@@ -81,9 +81,9 @@ class ApartmentBot:
             [InlineKeyboardButton("🚪 Exit", callback_data="exit_bot")],
         ]
         
-        if LOG_LEVEL.upper() == "DEBUG":
-            keyboard.insert(0, [InlineKeyboardButton("🧪 Тест парсеров", callback_data="test_parsers")])
-            keyboard.insert(0, [InlineKeyboardButton("📊 Дашборд", callback_data="dashboard")])
+        if DEBUG_MODE:
+            keyboard.insert(0, [InlineKeyboardButton("🧪 Тест", callback_data="test_parsers"),
+                                InlineKeyboardButton("📊 Дашборд", callback_data="dashboard")])
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         local_photo = Path(__file__).parent / "start_photo.jpg"
@@ -364,20 +364,20 @@ class ApartmentBot:
         age_days = settings.get("max_publication_age_days", 3)
         age_label = f"до {age_days} дн." if age_days > 0 else "все"
         return (
-            "📋 Параметры поиска:\n"
+            "📋 <b>Параметры поиска:</b>\n"
             f"• Город: Новосибирск\n"
             f"• Площадь: от {settings['min_area']} м²\n"
             f"• Комнат: {settings['min_rooms']} или более\n"
             f"• Санузлов: {settings['min_bathrooms']}\n"
             f"• Цена: до {settings['max_price']:,} ₽\n"
             f"• Срок давности: {age_label}\n\n"
-            "🔍 Условия отбора:\n"
+            "🔍 <b>Условия отбора:</b>\n"
             "• Возможна новостройка\n"
             "• Старый фонд — не первый/не последний этаж,\n"
             "  балкон/лоджия, хорошее состояние,\n"
-            "  год постройки не старше 1990\n\n"
-            "⚠️ <i>При парсинге сайтов возможно потребуется</i>\n"
-            "<i>пройти капчу или закрыть всплывающее окно в браузере.</i>"
+            "  год постройки не старше 1985\n\n"
+            "<blockquote>⚠️ При парсинге сайтов возможно потребуется\n"
+            "пройти капчу или закрыть всплывающее окно.</blockquote>"
         )
     
     def _format_settings(self, user_id: int) -> str:
@@ -617,18 +617,29 @@ class ApartmentBot:
             user_id = update.effective_user.id
             if user_id in self.subscribed_users:
                 self.subscribed_users.discard(user_id)
-                await self.safe_edit(query, "❌ Вы отписались от рассылки.")
+                await self.safe_edit(query, "❌ Вы отписались от рассылки.\n\nБольше не будете получать уведомления о новых квартирах.")
             else:
                 self.subscribed_users.add(user_id)
-                await self.safe_edit(query, "✅ Вы подписались на рассылку!")
+                settings = get_user_settings(user_id)
+                age_days = settings.get("max_publication_age_days", 3)
+                await self.safe_edit(
+                    query,
+                    f"✅ Вы подписались на рассылку!\n\n"
+                    f"📩 <b>Куда:</b> сюда, в этот чат\n"
+                    f"🕐 <b>Когда:</b> каждое утро в 9:00\n"
+                    f"🔍 <b>Поиск:</b> по вашим параметрам\n"
+                    f"   Площадь от {settings['min_area']} м² | До {settings['max_price']:,} ₽\n"
+                    f"   Комнат: {settings['min_rooms']}+ | Срок: до {age_days} дн.",
+                    parse_mode=ParseMode.HTML
+                )
         elif query.data == "feedback":
             await self.safe_edit(query, "💬 Напишите ваше сообщение разработчику. Для отмены нажмите /start")
         elif query.data == "exit_bot":
-            await self.safe_edit(query, "👋 Желаю удачи в поиске квартиры! Если захотите вернуться — напишите /start")
+            await query.edit_message_text("👋 Желаю удачи в поиске квартиры! Если захотите вернуться — напишите /start", reply_markup=None)
         elif query.data == "dashboard":
             report = get_dashboard("today")
             keyboard = [[InlineKeyboardButton("🏠 Меню", callback_data="main_menu")]]
-            await self.safe_edit(query, report, reply_markup=InlineKeyboardMarkup(keyboard))
+            await self.safe_edit(query, report, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         elif query.data == "test_parsers":
             await self._test_parsers(update, context)
 

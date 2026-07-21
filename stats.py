@@ -141,7 +141,7 @@ def get_dashboard(period: str = "today") -> str:
     """Форматирование дашборда"""
     stats = load_stats()
     now = datetime.now()
-    
+
     # Фильтрация по периоду
     if period == "today":
         start_date = now.strftime("%Y-%m-%d")
@@ -155,25 +155,25 @@ def get_dashboard(period: str = "today") -> str:
     else:
         start_date = "0000-00-00"
         label = "За всё время"
-    
+
     # Агрегация по дням
     total_requests = 0
     total_tokens = 0
     total_found = 0
     active_users = set()
-    
+
     for day, data in stats.get("daily", {}).items():
         if day >= start_date:
             total_requests += data.get("requests", 0)
             total_tokens += data.get("tokens", 0)
             total_found += data.get("found", 0)
-    
+
     # Уникальные пользователи за период
     for uid, data in stats.get("users", {}).items():
         last = data.get("last_active", "")[:10]
         if last >= start_date:
             active_users.add(uid)
-    
+
     # Топ-3 активных пользователей
     top_users = []
     for uid, data in stats.get("users", {}).items():
@@ -182,42 +182,35 @@ def get_dashboard(period: str = "today") -> str:
             top_users.append((uid, data))
     top_users.sort(key=lambda x: x[1].get("requests", 0), reverse=True)
     top_3 = top_users[:3]
-    
+
     # Статистика по агентствам
     agencies = stats.get("agencies", {})
-    
+
     # Формирование отчёта
     report = (
-        f"📊 ДАШБОРД — {label}\n"
-        f"{'=' * 30}\n\n"
+        f"📊 <b>ДАШБОРД — {label}</b>\n\n"
         f"⏱ Время работы: {get_uptime()}\n"
         f"👥 Пользователей: {len(active_users)}\n"
         f"🔍 Запросов: {total_requests}\n"
-        f"🔤 Токенов: {total_tokens}\n"
         f"🏠 Найдено квартир: {total_found}\n\n"
-        f"{'=' * 30}\n"
-        f"📈 ПО АГЕНТСТВАМ\n"
-        f"{'-' * 30}\n"
+        f"<b>📈 По источникам:</b>\n"
     )
-    
+
     agency_names = {"cian": "Циан", "avito": "Авито", "n1": "N1.RU", "domclick": "Домклик"}
     for key, name in agency_names.items():
-        data = agencies.get(key, {"requests": 0, "found": 0})
-        report += f"• {name}: найдено {data.get('found', 0)}\n"
-    
-    report += f"\n{'=' * 30}\n"
-    report += f"🏆 ТОП-3 АКТИВНЫХ ПОЛЬЗОВАТЕЛЕЙ\n"
-    report += f"{'-' * 30}\n"
-    
+        data = agencies.get(key, {"found": 0})
+        count = data.get("found", 0)
+        report += f"  {'✅' if count else '⬜'} {name}: {count}\n"
+
+    report += f"\n<b>🏆 Топ-3:</b>\n"
+
     for i, (key, data) in enumerate(top_3, 1):
         report += (
-            f"{i}. {key}\n"
-            f"   Запросов: {data.get('requests', 0)}\n"
-            f"   Токенов: {data.get('tokens', 0)}\n"
-            f"   Найдено: {data.get('found', 0)}\n"
+            f"  {i}. {key}\n"
+            f"     Запросов: {data.get('requests', 0)} | Найдено: {data.get('found', 0)}\n"
         )
-    
+
     if not top_3:
-        report += "Нет данных\n"
-    
+        report += "  Нет данных\n"
+
     return report
