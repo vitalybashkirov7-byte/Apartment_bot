@@ -57,6 +57,31 @@ def get_random_ua() -> str:
     return random.choice(USER_AGENTS)
 
 
+def _check_robots_txt(url: str, user_agent: str = "*") -> bool:
+    """Проверка robots.txt — разрешён ли доступ для парсера.
+
+    Returns:
+        True если доступ разрешён (или robots.txt недоступен),
+        False если доступ запрещён.
+    """
+    from urllib.parse import urlparse
+    from urllib.robotparser import RobotFileParser
+
+    try:
+        parsed = urlparse(url)
+        robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+        rp = RobotFileParser()
+        rp.set_url(robots_url)
+        rp.read()
+        can_fetch = rp.can_fetch(user_agent, url)
+        if not can_fetch:
+            logger.warning(f"robots.txt запрещает доступ к {url}")
+        return can_fetch
+    except Exception:
+        # Если robots.txt недоступен — разрешаем (но с осторожностью)
+        return True
+
+
 def _kill_chrome():
     """Убить все процессы Chrome/ChromeDriver (нужно между UC-парсерами)"""
     import subprocess
@@ -520,6 +545,12 @@ async def parse_cian_playwright() -> list[Apartment]:
     """Парсинг объявлений с Циан через Playwright Async API (fallback при блокировке HTTP)"""
     apartments = []
     try:
+        # Проверка robots.txt
+        cian_url = f"{SOURCES['cian']}/cat.php?deal_type=sale&offer_type=flat&region=4897"
+        if not _check_robots_txt(cian_url):
+            logger.warning("Циан: robots.txt запрещает парсинг — пропускаем")
+            return apartments
+
         PROXY = os.getenv("HTTP_PROXY")
 
         async with async_playwright() as p:
@@ -681,6 +712,12 @@ async def parse_n1_playwright() -> list[Apartment]:
     """Парсинг объявлений с N1.RU через Playwright Async API (fallback при блокировке HTTP)"""
     apartments = []
     try:
+        # Проверка robots.txt
+        n1_url = "https://novosibirsk.n1.ru/kupit/kvartiry/"
+        if not _check_robots_txt(n1_url):
+            logger.warning("N1.RU: robots.txt запрещает парсинг — пропускаем")
+            return apartments
+
         PROXY = os.getenv("HTTP_PROXY")
 
         async with async_playwright() as p:
