@@ -143,7 +143,7 @@ class ApartmentBot:
             sources = [("Циан", "cian"), ("Авито", "avito"), ("N1.RU", "n1"), ("Домклик", "domclick")]
 
             async with aiohttp.ClientSession(headers={"User-Agent": SEARCH_CONFIG.get("user_agent", "Mozilla/5.0")}) as session:
-                from parser import parse_cian, parse_avito_playwright, parse_n1, parse_domclick
+                from parser import parse_cian_playwright, parse_avito_playwright, parse_n1_playwright, parse_domclick_playwright
                 results = []
                 log_lines = []
 
@@ -155,13 +155,13 @@ class ApartmentBot:
 
                     try:
                         if name == "Циан":
-                            result = await parse_cian(session)
+                            result = await parse_cian_playwright()
                         elif name == "Авито":
                             result = await parse_avito_playwright()
                         elif name == "N1.RU":
-                            result = await parse_n1(session)
+                            result = await parse_n1_playwright()
                         elif name == "Домклик":
-                            result = await parse_domclick(session)
+                            result = await parse_domclick_playwright()
                         else:
                             result = []
 
