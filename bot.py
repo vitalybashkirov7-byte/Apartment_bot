@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, time
 from typing import Optional
 
 import aiohttp
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -84,11 +84,11 @@ class ApartmentBot:
         try:
             if local_photo.exists():
                 with open(local_photo, "rb") as photo:
-                    await update.message.reply_photo(photo=photo, caption=welcome_message, reply_markup=reply_markup)
+                    await update.message.reply_photo(photo=photo, caption=welcome_message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
             else:
-                await update.message.reply_photo(photo=START_PHOTO_URL, caption=welcome_message, reply_markup=reply_markup)
+                await update.message.reply_photo(photo=START_PHOTO_URL, caption=welcome_message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
         except Exception:
-            await update.message.reply_text(welcome_message, reply_markup=reply_markup)
+            await update.message.reply_text(welcome_message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
         
         logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} запустил бота")
     
@@ -136,7 +136,7 @@ class ApartmentBot:
         max_age_days = settings.get("max_publication_age_days", 3)
 
         params = self._format_search_params(user_id)
-        status_msg = await update.effective_message.reply_text(f"🔍 Начинаю поиск...\n\n{params}")
+        status_msg = await update.effective_message.reply_text(f"🔍 Начинаю поиск...\n\n{params}", parse_mode=ParseMode.HTML)
 
         try:
             apartments = []
@@ -209,7 +209,7 @@ class ApartmentBot:
                     [InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
                     [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
                 ]
-                await update.effective_message.reply_text(self._format_search_params(user_id), reply_markup=InlineKeyboardMarkup(keyboard))
+                await update.effective_message.reply_text(self._format_search_params(user_id), reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
                 return
 
             message = f"🏠 Найдено {len(decent)} подходящих квартир:\n\n"
@@ -226,7 +226,7 @@ class ApartmentBot:
             ]
 
             await update.effective_message.reply_text(message, reply_markup=InlineKeyboardMarkup(keyboard))
-            await update.effective_message.reply_text(self._format_search_params(user_id))
+            await update.effective_message.reply_text(self._format_search_params(user_id), parse_mode=ParseMode.HTML)
             logger.info(f"Поиск выполнен: найдено {len(decent)} квартир")
 
         except Exception as e:
@@ -314,7 +314,9 @@ class ApartmentBot:
             "• Возможна новостройка\n"
             "• Старый фонд — не первый/не последний этаж,\n"
             "  балкон/лоджия, хорошее состояние,\n"
-            "  год постройки не старше 1990"
+            "  год постройки не старше 1990\n\n"
+            "⚠️ <i>При парсинге сайтов возможно потребуется</i>\n"
+            "<i>пройти капчу или закрыть всплывающее окно в браузере.</i>"
         )
     
     def _format_settings(self, user_id: int) -> str:
@@ -461,12 +463,12 @@ class ApartmentBot:
         ]
         await self.safe_edit(query, message, reply_markup=InlineKeyboardMarkup(keyboard))
 
-    async def safe_edit(self, query, text: str, reply_markup=None) -> None:
+    async def safe_edit(self, query, text: str, reply_markup=None, parse_mode=None) -> None:
         """Безопасное редактирование сообщения"""
         try:
-            await query.edit_message_text(text, reply_markup=reply_markup)
+            await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
         except Exception:
-            await query.message.reply_text(text, reply_markup=reply_markup)
+            await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
     
     def update_activity(self, user_id: int) -> None:
         """Обновление времени последней активности"""
@@ -547,7 +549,7 @@ class ApartmentBot:
                 [InlineKeyboardButton("💬 Обратная связь", callback_data="feedback")],
                 [InlineKeyboardButton("🚪 Exit", callback_data="exit_bot")],
             ]
-            await self.safe_edit(query, f"🏠 Главное меню\n\n{self._format_search_params(user_id)}", reply_markup=InlineKeyboardMarkup(keyboard))
+            await self.safe_edit(query, f"🏠 Главное меню\n\n{self._format_search_params(user_id)}", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         elif query.data == "toggle_subscribe":
             user_id = update.effective_user.id
             if user_id in self.subscribed_users:
