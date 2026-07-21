@@ -44,9 +44,15 @@ docker-compose.override.yml
 
 # Cookies and secrets
 *_cookies.pkl
+*.pkl
 secrets.encrypted
+secrets.enc
+.secrets_key
 bot_stats.json
 user_settings.json
+
+# Generated files
+apartments_*.csv
 
 # Debug files
 *_debug*.html

@@ -72,11 +72,12 @@ class ApartmentBot:
             welcome_message += f"\n\n{stats}"
         
         keyboard = [
-            [InlineKeyboardButton("🔍 Поиск квартир", callback_data="search")],
-            [InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
-            [InlineKeyboardButton("📋 Последние объявления", callback_data="last")],
-            [InlineKeyboardButton("📩 Подписаться/Отписаться", callback_data="toggle_subscribe")],
-            [InlineKeyboardButton("💬 Обратная связь", callback_data="feedback")],
+            [InlineKeyboardButton("🔍 Поиск", callback_data="search"),
+             InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
+            [InlineKeyboardButton("📋 Объявления", callback_data="last"),
+             InlineKeyboardButton("💾 Скачать CSV", callback_data="download_csv")],
+            [InlineKeyboardButton("📩 Подписка", callback_data="toggle_subscribe"),
+             InlineKeyboardButton("💬 Связь", callback_data="feedback")],
             [InlineKeyboardButton("🚪 Exit", callback_data="exit_bot")],
         ]
         
@@ -95,7 +96,7 @@ class ApartmentBot:
         except Exception:
             await update.message.reply_text(welcome_message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
         
-        logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} запустил бота")
+        logger.info("Пользователь запустил бота")
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обработчик команды /help"""
@@ -174,8 +175,8 @@ class ApartmentBot:
                         log_lines.append(f"✅ {name}: {count} объявлений")
                         results.append(result)
                     except Exception as e:
-                        error_text = str(e)
-                        log_lines.append(f"❌ {name}: {error_text[:80]}")
+                        logger.error(f"Ошибка парсинга {name}: {e}")
+                        log_lines.append(f"⚠️ {name}: недоступен")
                         results.append([])
 
                     await asyncio.sleep(1)
@@ -210,9 +211,11 @@ class ApartmentBot:
             if not decent:
                 await update.effective_message.reply_text("😔 К сожалению, подходящих квартир не найдено. Попробуйте позже или измените параметры поиска.")
                 keyboard = [
-                    [InlineKeyboardButton("🔍 Поиск квартир", callback_data="search")],
-                    [InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
-                    [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
+                [
+                    InlineKeyboardButton("🔍 Поиск", callback_data="search"),
+                    InlineKeyboardButton("⚙️ Настройки", callback_data="settings"),
+                ],
+                [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
                 ]
                 await update.effective_message.reply_text(self._format_search_params(user_id), reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
                 return
@@ -225,10 +228,10 @@ class ApartmentBot:
                 message += f"... и ещё {len(decent) - 5} квартир.\n"
 
             keyboard = [
-                [InlineKeyboardButton("🔄 Обновить поиск", callback_data="search")],
-                [InlineKeyboardButton("📋 Все результаты", callback_data="last")],
-                [InlineKeyboardButton("💾 Скачать CSV", callback_data="download_csv")],
-                [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
+                [InlineKeyboardButton("🔄 Обновить", callback_data="search"),
+                 InlineKeyboardButton("📋 Все результаты", callback_data="last")],
+                [InlineKeyboardButton("💾 Скачать CSV", callback_data="download_csv"),
+                 InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
             ]
 
             await update.effective_message.reply_text(message, reply_markup=InlineKeyboardMarkup(keyboard))
@@ -268,8 +271,8 @@ class ApartmentBot:
             message += f"{i}. {apt}\n\n---\n\n"
 
         keyboard = [
-            [InlineKeyboardButton("🔍 Новый поиск", callback_data="search")],
-            [InlineKeyboardButton("🔄 Обновить", callback_data="last")],
+            [InlineKeyboardButton("🔍 Новый поиск", callback_data="search"),
+             InlineKeyboardButton("🔄 Обновить", callback_data="last")],
             [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
         ]
 
@@ -312,34 +315,34 @@ class ApartmentBot:
         filename = f"apartments_{timestamp}.csv"
         filepath = Path(__file__).parent / filename
 
-        with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
-            f.write(output.getvalue())
+        try:
+            with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
+                f.write(output.getvalue())
 
-        # Отправляем файл
-        with open(filepath, "rb") as f:
-            await query.message.reply_document(
-                document=f,
-                filename=filename,
-                caption=f"📊 Найдено {len(apartments)} квартир\n📅 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
-            )
-
-        # Удаляем временный файл
-        filepath.unlink(missing_ok=True)
-        logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} скачал CSV ({len(apartments)} квартир)")
+            # Отправляем файл
+            with open(filepath, "rb") as f:
+                await query.message.reply_document(
+                    document=f,
+                    filename=filename,
+                    caption=f"📊 Найдено {len(apartments)} квартир\n📅 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+                )
+        finally:
+            filepath.unlink(missing_ok=True)
+        logger.info(f"Пользователь скачал CSV ({len(apartments)} квартир)")
 
     async def subscribe_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обработчик команды /subscribe"""
         user_id = update.effective_user.id
         self.subscribed_users.add(user_id)
         await update.message.reply_text("✅ Вы подписались на ежедневную рассылку! Каждое утро вы будете получать свежие объявления.")
-        logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} подписался на рассылку")
+        logger.info("Пользователь подписался на рассылку")
     
     async def unsubscribe_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обработчик команды /unsubscribe"""
         user_id = update.effective_user.id
         self.subscribed_users.discard(user_id)
         await update.message.reply_text("❌ Вы отписались от рассылки.")
-        logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} отписался от рассылки")
+        logger.info("Пользователь отписался от рассылки")
     
     async def settings_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обработчик команды /settings"""
@@ -602,12 +605,12 @@ class ApartmentBot:
         elif query.data == "main_menu":
             user_id = update.effective_user.id
             keyboard = [
-                [InlineKeyboardButton("🔍 Поиск квартир", callback_data="search")],
-                [InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
-                [InlineKeyboardButton("📋 Последние объявления", callback_data="last")],
-                [InlineKeyboardButton("📩 Подписаться", callback_data="toggle_subscribe")],
-                [InlineKeyboardButton("💬 Обратная связь", callback_data="feedback")],
-                [InlineKeyboardButton("🚪 Exit", callback_data="exit_bot")],
+                [InlineKeyboardButton("🔍 Поиск", callback_data="search"),
+                 InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
+                [InlineKeyboardButton("📋 Объявления", callback_data="last"),
+                 InlineKeyboardButton("📩 Подписка", callback_data="toggle_subscribe")],
+                [InlineKeyboardButton("💬 Связь", callback_data="feedback"),
+                 InlineKeyboardButton("🚪 Exit", callback_data="exit_bot")],
             ]
             await self.safe_edit(query, f"🏠 Главное меню\n\n{self._format_search_params(user_id)}", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         elif query.data == "toggle_subscribe":
