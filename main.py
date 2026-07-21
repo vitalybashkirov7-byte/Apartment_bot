@@ -52,8 +52,10 @@ def _watcher_loop():
                 if "__pycache__" in root:
                     import shutil
                     shutil.rmtree(root, ignore_errors=True)
-            # Перезапуск процесса
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+            # Перезапуск через subprocess (надёжнее на Windows чем os.execv)
+            import subprocess
+            subprocess.Popen([sys.executable] + sys.argv, cwd=_WATCH_DIR)
+            sys.exit(0)
 
 
 def start_auto_reload():

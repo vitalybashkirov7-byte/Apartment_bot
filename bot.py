@@ -2,13 +2,18 @@
 Telegram-бот для поиска квартир в Новосибирске
 """
 import asyncio
+import csv
+import io
 import logging
 import re
+import os
 from datetime import datetime, timedelta, time
+from pathlib import Path
 from typing import Optional
 
 import aiohttp
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -222,6 +227,7 @@ class ApartmentBot:
             keyboard = [
                 [InlineKeyboardButton("🔄 Обновить поиск", callback_data="search")],
                 [InlineKeyboardButton("📋 Все результаты", callback_data="last")],
+                [InlineKeyboardButton("💾 Скачать CSV", callback_data="download_csv")],
                 [InlineKeyboardButton("🏠 Меню", callback_data="main_menu")],
             ]
 
@@ -268,7 +274,59 @@ class ApartmentBot:
         ]
 
         await update.message.reply_text(message, reply_markup=InlineKeyboardMarkup(keyboard))
-    
+
+    async def download_csv(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Скачать результаты поиска в CSV"""
+        query = update.callback_query
+        await query.answer()
+
+        apartments = self.last_search_results
+        if not apartments:
+            await query.message.reply_text("😔 Нет результатов для скачивания. Сначала выполните поиск.")
+            return
+
+        # Генерация CSV
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Источник", "Цена (₽)", "Площадь (м²)", "Комнат", "Санузлов", "Этаж", "Всего этажей", "Адрес", "Описание", "Балкон", "Состояние", "Ссылка", "Дата"])
+
+        for apt in apartments:
+            writer.writerow([
+                apt.source,
+                apt.price,
+                apt.area,
+                apt.rooms,
+                apt.bathrooms,
+                apt.floor,
+                apt.total_floors,
+                apt.address,
+                apt.description[:100],
+                "Да" if apt.has_balcony else "Нет",
+                apt.condition,
+                apt.url,
+                apt.published_date,
+            ])
+
+        # Сохраняем во временный файл
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"apartments_{timestamp}.csv"
+        filepath = Path(__file__).parent / filename
+
+        with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
+            f.write(output.getvalue())
+
+        # Отправляем файл
+        with open(filepath, "rb") as f:
+            await query.message.reply_document(
+                document=f,
+                filename=filename,
+                caption=f"📊 Найдено {len(apartments)} квартир\n📅 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+            )
+
+        # Удаляем временный файл
+        filepath.unlink(missing_ok=True)
+        logger.info(f"Пользователь @{update.effective_user.username or 'unknown'} скачал CSV ({len(apartments)} квартир)")
+
     async def subscribe_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обработчик команды /subscribe"""
         user_id = update.effective_user.id
@@ -533,6 +591,8 @@ class ApartmentBot:
             await self._do_search(update, context, user_id)
         elif query.data == "last":
             await self.last_command(update, context)
+        elif query.data == "download_csv":
+            await self.download_csv(update, context)
         elif query.data == "settings":
             await self.settings_callback(update, context)
         elif query.data.startswith("set_"):
