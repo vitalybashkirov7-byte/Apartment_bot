@@ -36,20 +36,29 @@
 
 3. Создайте бота через [@BotFather](https://t.me/BotFather) и получите токен
 
-4. Настройте `.env` файл (скопируйте из `.env.example`):
+4. **Настройте токен** как системную переменную Windows (НЕ в .env):
+   ```powershell
+   # PowerShell:
+   [Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "ваш_токен", "User")
+   
+   # Или cmd:
+   setx TELEGRAM_BOT_TOKEN "ваш_токен"
+   ```
+   > ⚠️ Перезапустите терминал/IDE после установки переменной!
+
+5. Настройте `.env` файл (скопируйте из `.env.example`):
    ```env
-   TELEGRAM_BOT_TOKEN=ваш_токен
    DEV_CHAT_ID=ваш_telegram_id
-   MIN_AREA=90
-   MAX_PRICE=17000000
+   MIN_AREA=91
+   MAX_PRICE=18000000
    MIN_ROOMS=3
-   MIN_BATHROOMS=2
+   MIN_BATHROOMS=1
    RATE_LIMIT_PER_MINUTE=5
-   DAILY_LIMIT_PER_USER=50
-   LOG_LEVEL=INFO
+   DAILY_LIMIT_PER_USER=20
+   LOG_LEVEL=DEBUG
    ```
 
-5. Запустите бота:
+6. Запустите бота:
    ```bash
    python main.py
    ```
@@ -274,6 +283,42 @@ Apartment_bot/
 3. **curl_cffi** — уже установлен, эмулирует Chrome 120
 
 4. **Задержки** — увеличьте `REQUEST_DELAY` в конфигурации
+
+## Безопасность
+
+### Хранение секретов
+
+Токен бота **не хранится** в `.env` файле и **не публикуется** в Git.
+
+**Приоритет загрузки секретов:**
+1. Системные переменные окружения Windows (наивысший)
+2. Зашифрованный файл `secrets.encrypted` (AES-256)
+3. Файл `.env` (только для нечувствительных данных)
+
+**Настройка токена:**
+```powershell
+[Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "токен", "User")
+```
+
+**Проверка:**
+```powershell
+[Environment]::GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "User")
+```
+
+### Что исключено из Git (.gitignore)
+
+- `.env` — файл окружения с секретами
+- `*.pkl` — cookies файлы (pickle небезопасен)
+- `secrets.encrypted` — зашифрованные секреты
+- `secrets.enc` — альтернативный формат
+- `.secrets_key` — ключ шифрования
+- `bot.log` — логи с данными пользователей
+- `user_settings.json` — настройки пользователей
+- `apartments_*.csv` — временные файлы результатов
+
+### Docker
+
+Файл `.dockerignore` исключает секреты из Docker-образа.
 
 ## Юридическая информация
 
