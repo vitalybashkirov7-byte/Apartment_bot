@@ -145,6 +145,9 @@ DAILY_LIMIT_PER_USER = int(get_secret("DAILY_LIMIT_PER_USER", "50"))
 # Режим отладки
 DEBUG_MODE = get_secret("DEBUG_MODE", "false").lower() == "true"
 
+# URL Mini App дашборда (для Telegram WebApp)
+MINIAPP_URL = get_secret("MINIAPP_URL", "http://localhost:5000")
+
 # ============================================
 # ПРОКСИ (опционально)
 # ============================================

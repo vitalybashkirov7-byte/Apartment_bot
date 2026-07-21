@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 import aiohttp
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.constants import ParseMode
 from telegram.ext import (
     CallbackContext,
@@ -24,7 +24,7 @@ from telegram.ext import (
 )
 
 from pathlib import Path
-from config import TELEGRAM_BOT_TOKEN, START_PHOTO_URL, SEARCH_CONFIG, USER_AGENT, DEBUG_MODE, RATE_LIMIT_PER_MINUTE, DAILY_LIMIT_PER_USER, LOG_LEVEL
+from config import TELEGRAM_BOT_TOKEN, START_PHOTO_URL, SEARCH_CONFIG, USER_AGENT, DEBUG_MODE, RATE_LIMIT_PER_MINUTE, DAILY_LIMIT_PER_USER, LOG_LEVEL, MINIAPP_URL
 from parser import Apartment, get_last_apartments, search_apartments
 from user_settings import get_user_settings, update_user_setting
 from stats import track_request, track_user, get_dashboard
@@ -84,6 +84,8 @@ class ApartmentBot:
         if DEBUG_MODE:
             keyboard.insert(0, [InlineKeyboardButton("🧪 Тест", callback_data="test_parsers"),
                                 InlineKeyboardButton("📊 Дашборд", callback_data="dashboard")])
+        # Mini App кнопка (всегда доступна)
+        keyboard.insert(0, [InlineKeyboardButton("📊 Открыть дашборд", web_app=WebAppInfo(url=MINIAPP_URL))])
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         local_photo = Path(__file__).parent / "start_photo.jpg"

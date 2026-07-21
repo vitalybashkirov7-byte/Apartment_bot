@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Дашборд</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #999);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card.full-width {
+            grid-column: span 2;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #3390ec);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sources-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .source-item {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-icon {
+            font-size: 24px;
+        }
+
+        .source-info {
+            flex: 1;
+        }
+
+        .source-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .source-count {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .user-list {
+            list-style: none;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .user-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-rank {
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #3390ec);
+            min-width: 24px;
+        }
+
+        .user-name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .user-stats {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .period-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .period-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .period-tab.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: #ffffff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .refresh-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .refresh-btn:active {
+            opacity: 0.8;
+        }
+
+        .updated-at {
+            text-align: center;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Дашборд</h1>
+        <div class="subtitle">Статистика бота поиска квартир</div>
+    </div>
+
+    <div id="app">
+        <div class="loading">Загрузка...</div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+        }
+
+        let currentPeriod = 'today';
+        let statsData = null;
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                statsData = await response.json();
+                render();
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="loading">Ошибка загрузки данных</div>
+                `;
+            }
+        }
+
+        function render() {
+            if (!statsData) return;
+
+            const periodData = statsData[currentPeriod] || statsData.today;
+
+            document.getElementById('app').innerHTML = `
+                <div class="period-tabs">
+                    <button class="period-tab ${currentPeriod === 'today' ? 'active' : ''}" onclick="setPeriod('today')">Сегодня</button>
+                    <button class="period-tab ${currentPeriod === 'week' ? 'active' : ''}" onclick="setPeriod('week')">Неделя</button>
+                    <button class="period-tab ${currentPeriod === 'month' ? 'active' : ''}" onclick="setPeriod('month')">Месяц</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${periodData.requests}</div>
+                        <div class="stat-label">Запросов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${periodData.found}</div>
+                        <div class="stat-label">Найдено</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${statsData.total.users}</div>
+                        <div class="stat-label">Пользователей</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${statsData.uptime_hours}ч</div>
+                        <div class="stat-label">Время работы</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📈 Источники</div>
+                    <div class="sources-grid">
+                        <div class="source-item">
+                            <div class="source-icon">🏢</div>
+                            <div class="source-info">
+                                <div class="source-name">Циан</div>
+                                <div class="source-count">${statsData.agencies.cian}</div>
+                            </div>
+                        </div>
+                        <div class="source-item">
+                            <div class="source-icon">🛒</div>
+                            <div class="source-info">
+                                <div class="source-name">Авито</div>
+                                <div class="source-count">${statsData.agencies.avito}</div>
+                            </div>
+                        </div>
+                        <div class="source-item">
+                            <div class="source-icon">🏠</div>
+                            <div class="source-info">
+                                <div class="source-name">N1.RU</div>
+                                <div class="source-count">${statsData.agencies.n1}</div>
+                            </div>
+                        </div>
+                        <div class="source-item">
+                            <div class="source-icon">🔑</div>
+                            <div class="source-info">
+                                <div class="source-name">Домклик</div>
+                                <div class="source-count">${statsData.agencies.domclick}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Топ пользователей</div>
+                    <ul class="user-list">
+                        ${statsData.top_users.length > 0
+                            ? statsData.top_users.slice(0, 5).map((user, i) => `
+                                <li class="user-item">
+                                    <span class="user-rank">${i + 1}</span>
+                                    <span class="user-name">${user.name}</span>
+                                    <span class="user-stats">${user.requests} запросов · ${user.found} найдено</span>
+                                </li>
+                            `).join('')
+                            : '<li class="user-item"><span class="user-name">Нет данных</span></li>'
+                        }
+                    </ul>
+                </div>
+
+                <button class="refresh-btn" onclick="loadStats()">🔄 Обновить</button>
+                <div class="updated-at">Обновлено: ${new Date(statsData.generated_at).toLocaleString('ru-RU')}</div>
+            `;
+        }
+
+        function setPeriod(period) {
+            currentPeriod = period;
+            render();
+        }
+
+        // Загрузка при старте
+        loadStats();
+
+        // Автообновление каждые 30 секунд
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>
