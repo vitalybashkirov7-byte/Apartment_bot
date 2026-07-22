@@ -1,5 +1,19 @@
-# Зависимости для Telegram-бота поиска квартир
+# Telegram-бот поиска квартир в Новосибирске
+
+# Основные
 python-telegram-bot[job-queue]>=20.0
 aiohttp>=3.9.0
 beautifulsoup4>=4.12.0
 lxml>=5.0.0
+curl_cffi>=0.7.0
+
+# Mini App дашборд
+flask>=3.0.0
+
+# Парсеры
+playwright>=1.40.0
+undetected-chromedriver>=4.0.0
+selenium>=4.15.0
+
+# Утилиты
+cryptography>=41.0.0

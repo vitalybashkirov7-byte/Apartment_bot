@@ -16,3 +16,9 @@ test_*.py
 *_debug*.html
 logo/
 *.md
+ngrok*.log
+ngrok_*.txt
+.sentry-native/
+run_tests.py
+tests/
+ТЗ/
