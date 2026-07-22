@@ -1,0 +1,92 @@
+t=2026-07-22T11:40:59+0300 lvl=info msg="no configuration paths supplied"
+t=2026-07-22T11:40:59+0300 lvl=info msg="using configuration at default config path" path=C:\\Users\\Виталий\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-07-22T11:40:59+0300 lvl=info msg="open config file" path=C:\\Users\\Виталий\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-07-22T11:40:59+0300 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-07-22T11:40:59+0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-07-22T11:40:59+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": EOF"
+t=2026-07-22T11:41:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=5db8547dd7da
+t=2026-07-22T11:41:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:41:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:42:05+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:42:18+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:42:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ed775b4f32b1
+t=2026-07-22T11:42:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:43:14+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:43:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:44:30+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:45:20+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:46:01+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:46:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:47:46+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6faab85f88af
+t=2026-07-22T11:47:46+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:48:26+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:49:16+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:50:06+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:50:46+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:51:41+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=bf66202629bc
+t=2026-07-22T11:51:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:52:36+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ee2ef55cd43a
+t=2026-07-22T11:52:36+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:53:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:54:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=dd4abc4b9e77
+t=2026-07-22T11:54:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:55:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:55:42+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:56:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:57:21+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:58:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T11:58:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T11:59:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=475e08f7787f
+t=2026-07-22T11:59:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:00:27+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:01:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:02:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=f102db0d048d
+t=2026-07-22T12:02:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:02:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:03:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=770bdc52eff8
+t=2026-07-22T12:03:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:04:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:05:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:06:13+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=457c1f3e3c48
+t=2026-07-22T12:06:13+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:07:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:07:43+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:08:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:09:22+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:10:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:10:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:11:42+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:12:22+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:13:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:13:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:14:42+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:15:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:16:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:17:07+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=27bdbb836deb
+t=2026-07-22T12:17:07+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:17:57+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:18:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:19:27+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:20:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:20:57+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:21:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:22:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b54c7ea6ba5b
+t=2026-07-22T12:22:42+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:23:22+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:24:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:25:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:25:42+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:26:37+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ec515a3bb44c
+t=2026-07-22T12:26:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:27:32+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a717b229491e
+t=2026-07-22T12:27:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:28:13+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:29:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:29:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-07-22T12:30:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-07-22T12:31:03+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="authentication failed: We do not allow agents to connect to ngrok from your IP address (92.36.109.101).\r\n\r\nERR_NGROK_9040\r\n"
+t=2026-07-22T12:31:03+0300 lvl=eror msg="session closing" obj=tunnels.session err="authentication failed: We do not allow agents to connect to ngrok from your IP address (92.36.109.101).\r\n\r\nERR_NGROK_9040\r\n"
+t=2026-07-22T12:31:03+0300 lvl=info msg="received stop request" obj=app stopReq="{err:{Remote:true Inner:{Inner:0x12e8a2806cb0}} restart:false}"
+t=2026-07-22T12:31:03+0300 lvl=eror msg="terminating with error" obj=app err="authentication failed: We do not allow agents to connect to ngrok from your IP address (92.36.109.101).\r\n\r\nERR_NGROK_9040\r\n"
+t=2026-07-22T12:31:03+0300 lvl=crit msg="command failed" err="authentication failed: We do not allow agents to connect to ngrok from your IP address (92.36.109.101).\r\n\r\nERR_NGROK_9040\r\n"
+t=2026-07-22T12:31:03+0300 lvl=info msg="no more state changes" obj=tunnels.session
