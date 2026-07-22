@@ -220,17 +220,36 @@
 
     <script>
         // Инициализация Telegram WebApp
+        let tgApp = null;
+        let initData = null;
+
         if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
+            tgApp = Telegram.WebApp;
+            tgApp.ready();
+            tgApp.expand();
+            initData = tgApp.initData;
         }
 
         let currentPeriod = 'today';
         let statsData = null;
 
+        function getHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (initData) {
+                headers['X-Telegram-Init-Data'] = initData;
+            }
+            return headers;
+        }
+
         async function loadStats() {
             try {
-                const response = await fetch('/api/stats');
+                const response = await fetch('/api/stats', { headers: getHeaders() });
+                if (response.status === 401) {
+                    document.getElementById('app').innerHTML = `
+                        <div class="loading">⚠️ Требуется авторизация через Telegram</div>
+                    `;
+                    return;
+                }
                 statsData = await response.json();
                 render();
             } catch (error) {

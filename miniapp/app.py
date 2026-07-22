@@ -3,20 +3,100 @@ Mini App дашборд для Telegram бота
 Запуск: python miniapp/app.py
 Доступ: http://localhost:5000
 """
+import hashlib
+import hmac
 import json
 import os
 import sys
+import time
 from datetime import datetime, timedelta
+from functools import wraps
 from pathlib import Path
+from urllib.parse import unquote
 
-from flask import Flask, jsonify, render_template, send_from_directory
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from config import TELEGRAM_BOT_TOKEN
+
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 STATS_FILE = Path(__file__).parent.parent / "bot_stats.json"
+
+
+# ============================================
+# Telegram WebApp Authentication
+# ============================================
+
+def validate_telegram_init_data(init_data: str) -> dict | None:
+    """Валидация initData от Telegram WebApp через HMAC-SHA256.
+
+    Returns:
+        dict с данными пользователя или None если валидация не прошла
+    """
+    try:
+        # Парсим initData в словарь
+        data = {}
+        for item in init_data.split("&"):
+            if "=" in item:
+                key, value = item.split("=", 1)
+                data[key] = unquote(value)
+
+        # Извлекаем hash и удаляем его из данных
+        received_hash = data.pop("hash", None)
+        if not received_hash:
+            return None
+
+        # Создаём строку для проверки (ключи в алфавитном порядке, hash исключён)
+        data_check_string = "\n".join(
+            f"{k}={v}" for k, v in sorted(data.items())
+        )
+
+        # HMAC-SHA256 с bot_token как секретом
+        secret_key = hmac.new(
+            b"WebAppData",
+            TELEGRAM_BOT_TOKEN.encode(),
+            hashlib.sha256,
+        ).digest()
+
+        computed_hash = hmac.new(
+            secret_key,
+            data_check_string.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+
+        # Сравниваем хеши
+        if not hmac.compare_digest(computed_hash, received_hash):
+            return None
+
+        # Проверяем时效 (auth_date не старше 24 часов)
+        auth_date = int(data.get("auth_date", 0))
+        if time.time() - auth_date > 86400:
+            return None
+
+        return data
+
+    except Exception:
+        return None
+
+
+def require_auth(f):
+    """Декоратор: проверка авторизации Telegram WebApp"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        init_data = request.headers.get("X-Telegram-Init-Data") or request.args.get("init_data")
+        if not init_data:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        user_data = validate_telegram_init_data(init_data)
+        if not user_data:
+            return jsonify({"error": "Invalid authentication"}), 401
+
+        request.telegram_user = user_data
+        return f(*args, **kwargs)
+    return decorated
 
 
 def load_stats() -> dict:
@@ -50,6 +130,7 @@ def index():
 
 
 @app.route("/api/stats")
+@require_auth
 def api_stats():
     """API: получение статистики"""
     stats = load_stats()
@@ -116,6 +197,21 @@ def api_stats():
         },
         "top_users": top_users[:10],
         "generated_at": now.isoformat(),
+    })
+
+
+@app.route("/api/user")
+@require_auth
+def api_user():
+    """API: информация о текущем пользователе"""
+    user = request.telegram_user
+    return jsonify({
+        "id": user.get("id"),
+        "first_name": user.get("first_name"),
+        "last_name": user.get("last_name"),
+        "username": user.get("username"),
+        "language_code": user.get("language_code"),
+        "is_premium": user.get("is_premium", False),
     })
 
 
